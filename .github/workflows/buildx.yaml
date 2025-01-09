@@ -57,51 +57,51 @@ jobs:
         name: kernel versions
         with:
           script: |
-              var all_kernels = ['4.19', '5.4', '5.10', '5.15', '6.1', '6.6', '6.12', 'bpf', 'bpf-net', 'bpf-next', 'rhel8.6', 'rhel8.9' ]
-              all_kernels = ['5.10']
-              var kernels = []
-              const kernel_label_prefix = 'gha-builds/kernel/'
-              res = await github.rest.issues.listLabelsOnIssue({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-              });
-              for (const l of res.data) {
-                  if (l.name.startsWith(kernel_label_prefix)) {
-                      s = l.name.slice(kernel_label_prefix.length)
-                      if (s.length > 0) {
-                          kernels.push(s)
-                      }
-                  }
-              }
+            var all_kernels = ['4.19', '5.4', '5.10', '5.15', '6.1', '6.6', '6.12', 'bpf', 'bpf-net', 'bpf-next', 'rhel8.6', 'rhel8.9' ]
+            all_kernels = ['5.10']
+            var kernels = []
+            const kernel_label_prefix = 'gha-builds/kernel/'
+            res = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            for (const l of res.data) {
+                if (l.name.startsWith(kernel_label_prefix)) {
+                    s = l.name.slice(kernel_label_prefix.length)
+                    if (s.length > 0) {
+                        kernels.push(s)
+                    }
+                }
+            }
 
-              if (kernels.length == 0) {
-                  kernels = all_kernels
-              }
+            if (kernels.length == 0) {
+                kernels = all_kernels
+            }
 
-              ret = []
-              for (const k of kernels) {
-                  options = {"ver": k}
-                  switch (k) {
-                      case 'rhel8.6':
-                          options.dockerfile = "dockerfiles/kernel-images-rhel8"
-                          options.platforms = 'linux/amd64'
-                          options.rhel_ver = '8.6'
-                          options.rhel_kver = '4.18.0-372.32.1.el8_6'
-                          break
-                      case 'rhel8.9':
-                          options.dockerfile = "dockerfiles/kernel-images-rhel8"
-                          options.platforms = 'linux/amd64'
-                          options.rhel_ver = '8.9'
-                          options.rhel_kver = '4.18.0-513.24.1.el8_9'
-                          break
-                      default:
-                          options.dockerfile = "dockerfiles/kernel-images"
-                          options.platforms = 'linux/amd64,linux/arm64'
-                  }
-                  ret.push(options)
-              }
-              return ret
+            ret = []
+            for (const k of kernels) {
+                options = {"ver": k}
+                switch (k) {
+                    case 'rhel8.6':
+                        options.dockerfile = "dockerfiles/kernel-images-rhel8"
+                        options.platforms = 'linux/amd64'
+                        options.rhel_ver = '8.6'
+                        options.rhel_kver = '4.18.0-372.32.1.el8_6'
+                        break
+                    case 'rhel8.9':
+                        options.dockerfile = "dockerfiles/kernel-images-rhel8"
+                        options.platforms = 'linux/amd64'
+                        options.rhel_ver = '8.9'
+                        options.rhel_kver = '4.18.0-513.24.1.el8_9'
+                        break
+                    default:
+                        options.dockerfile = "dockerfiles/kernel-images"
+                        options.platforms = 'linux/amd64,linux/arm64'
+                }
+                ret.push(options)
+            }
+            return ret
       - name: configure
         id: configure
         run: |
@@ -117,15 +117,15 @@ jobs:
     uses: ./.github/workflows/buildx-stage.yaml
     secrets: inherit
     with:
-     name: kernel-builder
-     build-file: dockerfiles/kernel-builder
-     build-tag: ghcr.io/lvh-images/kernel-builder-ci:${{ needs.conf.outputs.tag }}
-     check-files: dockerfiles/kernel-builder
-     base-ref: ${{ github.base_ref }}
-     dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
-     patch-cmd: |
-         echo ${{ needs.conf.outputs.tag }} > versions/kernel-builder
-         perl -pi -e 's/^ARG KERNEL_BUILDER_TAG.*$/ARG KERNEL_BUILDER_TAG=${{ needs.conf.outputs.tag }}/' dockerfiles/*
+      name: kernel-builder
+      build-file: dockerfiles/kernel-builder
+      build-tag: ghcr.io/harden-runner-canary/lvh-images/kernel-builder-ci:${{ needs.conf.outputs.tag }}
+      check-files: dockerfiles/kernel-builder
+      base-ref: ${{ github.base_ref }}
+      dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
+      patch-cmd: |
+        echo ${{ needs.conf.outputs.tag }} > versions/kernel-builder
+        perl -pi -e 's/^ARG KERNEL_BUILDER_TAG.*$/ARG KERNEL_BUILDER_TAG=${{ needs.conf.outputs.tag }}/' dockerfiles/*
 
   kernel-images:
     needs: [conf, kernel-builder]
@@ -136,21 +136,21 @@ jobs:
     uses: ./.github/workflows/buildx-stage.yaml
     secrets: inherit
     with:
-     name: kernel-image-${{ matrix.kernel.ver }}
-     build-file: ${{ matrix.kernel.dockerfile }}
-     build-tag: ghcr.io/lvh-images/kernel-images-ci:${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}
-     build-args: |
-          "KERNEL_VER=${{ matrix.kernel.ver }}"
-          "RHEL_VER=${{ matrix.kernel.rhel_ver }}"
-          "RHEL_KVER=${{ matrix.kernel.rhel_kver }}"
-     check-files: '.'
-     base-ref: ${{ github.base_ref }}
-     dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
-     apply-patch: kernel-builder.patch
-     patch-cmd: |
-         mkdir -p versions/kernel-images
-         echo ${{ needs.conf.outputs.tag}} > versions/kernel-images/${{ matrix.kernel.ver }}
-     platforms: ${{ matrix.kernel.platforms }}
+      name: kernel-image-${{ matrix.kernel.ver }}
+      build-file: ${{ matrix.kernel.dockerfile }}
+      build-tag: ghcr.io/harden-runner-canary/lvh-images/kernel-images-ci:${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}
+      build-args: |
+        "KERNEL_VER=${{ matrix.kernel.ver }}"
+        "RHEL_VER=${{ matrix.kernel.rhel_ver }}"
+        "RHEL_KVER=${{ matrix.kernel.rhel_kver }}"
+      check-files: "."
+      base-ref: ${{ github.base_ref }}
+      dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
+      apply-patch: kernel-builder.patch
+      patch-cmd: |
+        mkdir -p versions/kernel-images
+        echo ${{ needs.conf.outputs.tag}} > versions/kernel-images/${{ matrix.kernel.ver }}
+      platforms: ${{ matrix.kernel.platforms }}
 
   root-builder:
     needs: [conf]
@@ -158,19 +158,19 @@ jobs:
     strategy:
       matrix:
         runner:
-          - {name: "ubuntu-latest", arch: "amd64"}
-          - {name: "ubuntu-22.04-arm64", arch: "arm64"}
+          - { name: "ubuntu-latest", arch: "amd64" }
+          # - {name: "ubuntu-22.04-arm64", arch: "arm64"}
     uses: ./.github/workflows/buildx-stage.yaml
     secrets: inherit
     with:
-     name: root-builder-${{ matrix.runner.arch }}
-     runner: ${{ matrix.runner.name }}
-     check-files: dockerfiles/root-builder
-     build-file: dockerfiles/root-builder
-     build-tag: ghcr.io/lvh-images/root-builder-ci:${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }}
-     base-ref: ${{ github.base_ref }}
-     dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
-     patch-cmd: |
+      name: root-builder-${{ matrix.runner.arch }}
+      runner: ${{ matrix.runner.name }}
+      check-files: dockerfiles/root-builder
+      build-file: dockerfiles/root-builder
+      build-tag: ghcr.io/harden-runner-canary/lvh-images/root-builder-ci:${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }}
+      base-ref: ${{ github.base_ref }}
+      dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
+      patch-cmd: |
         mkdir -p versions/root-builder
         echo ${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }} > versions/root-builder/${{ matrix.runner.arch }}
 
@@ -180,22 +180,22 @@ jobs:
     strategy:
       matrix:
         runner:
-          - {name: "ubuntu-latest", arch: "amd64"}
-          - {name: "ubuntu-22.04-arm64", arch: "arm64"}
+          - { name: "ubuntu-latest", arch: "amd64" }
+          # - {name: "ubuntu-22.04-arm64", arch: "arm64"}
     uses: ./.github/workflows/buildx-stage.yaml
     secrets: inherit
     with:
-     name: root-images-${{ matrix.runner.arch }}
-     runner: ${{ matrix.runner.name }}
-     check-files: dockerfiles/root-images _data/images.json _data/env.sh _data/bootstrap
-     build-file: dockerfiles/root-images
-     build-tag: ghcr.io/lvh-images/root-images-ci:${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }}
-     build-args: |
-          "ROOT_BUILDER_TAG=$(cat versions/root-builder/${{ matrix.runner.arch }})"
-     base-ref: ${{ github.base_ref }}
-     dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
-     apply-patch: root-builder-${{ matrix.runner.arch }}.patch
-     patch-cmd: |
+      name: root-images-${{ matrix.runner.arch }}
+      runner: ${{ matrix.runner.name }}
+      check-files: dockerfiles/root-images _data/images.json _data/env.sh _data/bootstrap
+      build-file: dockerfiles/root-images
+      build-tag: ghcr.io/harden-runner-canary/lvh-images/root-images-ci:${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }}
+      build-args: |
+        "ROOT_BUILDER_TAG=$(cat versions/root-builder/${{ matrix.runner.arch }})"
+      base-ref: ${{ github.base_ref }}
+      dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
+      apply-patch: root-builder-${{ matrix.runner.arch }}.patch
+      patch-cmd: |
         mkdir -p versions/root-images
         echo ${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }} > versions/root-images/${{ matrix.runner.arch }}
 
@@ -206,32 +206,32 @@ jobs:
       matrix:
         kernel: ${{ fromJSON(needs.conf.outputs.kvers) }}
         runner:
-          - {name: "ubuntu-latest", arch: "amd64"}
+          - { name: "ubuntu-latest", arch: "amd64" }
           # - {name: "ubuntu-22.04-arm64", arch: "arm64"}
         exclude:
-          - runner: {name: "ubuntu-22.04-arm64", arch: "arm64"}
-            kernel: {ver: "rhel8.6"}
-          - runner: {name: "ubuntu-22.04-arm64", arch: "arm64"}
-            kernel: {ver: "rhel8.9"}
+          - runner: { name: "ubuntu-22.04-arm64", arch: "arm64" }
+            kernel: { ver: "rhel8.6" }
+          - runner: { name: "ubuntu-22.04-arm64", arch: "arm64" }
+            kernel: { ver: "rhel8.9" }
     uses: ./.github/workflows/buildx-stage.yaml
     secrets: inherit
     with:
-     name: kind-image-${{ matrix.kernel.ver }}-${{ matrix.runner.arch }}
-     runner: ${{ matrix.runner.name }}
-     build-file: dockerfiles/kind-images
-     build-tag: ghcr.io/lvh-images/kind-ci:${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }}
-     build-args: |
-          "KERNEL_VER=${{ matrix.kernel.ver }}"
-          "KERNEL_IMAGE_TAG=${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}"
-          "ROOT_IMAGES_TAG=$(cat versions/root-images/${{ matrix.runner.arch }})"
-     check-files: '.'
-     base-ref: ${{ github.base_ref }}
-     dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
-     apply-patch: root-images-${{ matrix.runner.arch }}.patch
-     apply-patch-2: kernel-image-${{ matrix.kernel.ver }}.patch
-     patch-cmd: |
-         mkdir -p versions/kind/${{ matrix.runner.arch }}
-         echo ${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }} > versions/kind/${{ matrix.runner.arch }}/${{ matrix.kernel.ver }}
+      name: kind-image-${{ matrix.kernel.ver }}-${{ matrix.runner.arch }}
+      runner: ${{ matrix.runner.name }}
+      build-file: dockerfiles/kind-images
+      build-tag: ghcr.io/harden-runner-canary/lvh-images/kind-ci:${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }}
+      build-args: |
+        "KERNEL_VER=${{ matrix.kernel.ver }}"
+        "KERNEL_IMAGE_TAG=${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}"
+        "ROOT_IMAGES_TAG=$(cat versions/root-images/${{ matrix.runner.arch }})"
+      check-files: "."
+      base-ref: ${{ github.base_ref }}
+      dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
+      apply-patch: root-images-${{ matrix.runner.arch }}.patch
+      apply-patch-2: kernel-image-${{ matrix.kernel.ver }}.patch
+      patch-cmd: |
+        mkdir -p versions/kind/${{ matrix.runner.arch }}
+        echo ${{ needs.conf.outputs.tag }}-${{ matrix.runner.arch }} > versions/kind/${{ matrix.runner.arch }}/${{ matrix.kernel.ver }}
 
   # complexity-test-images is hardcoded amd64 only for now
   complexity-test-images:
@@ -243,21 +243,21 @@ jobs:
     uses: ./.github/workflows/buildx-stage.yaml
     secrets: inherit
     with:
-     name: complexity-test-${{ matrix.kernel.ver }}-amd64
-     build-file: dockerfiles/complexity-test-images
-     build-tag: ghcr.io/lvh-images/complexity-test-ci:${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}
-     build-args: |
-          "KERNEL_VER=${{ matrix.kernel.ver }}"
-          "KERNEL_IMAGE_TAG=${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}"
-          "ROOT_IMAGES_TAG=$(cat versions/root-images/amd64)"
-     check-files: '.'
-     base-ref: ${{ github.base_ref }}
-     dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
-     apply-patch: root-images-amd64.patch
-     apply-patch-2: kernel-image-${{ matrix.kernel.ver }}.patch
-     patch-cmd: |
-         mkdir -p versions/complexity-test
-         echo ${{ needs.conf.outputs.tag}} > versions/complexity-test/${{ matrix.kernel.ver }}
+      name: complexity-test-${{ matrix.kernel.ver }}-amd64
+      build-file: dockerfiles/complexity-test-images
+      build-tag: ghcr.io/harden-runner-canary/lvh-images/complexity-test-ci:${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}
+      build-args: |
+        "KERNEL_VER=${{ matrix.kernel.ver }}"
+        "KERNEL_IMAGE_TAG=${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}"
+        "ROOT_IMAGES_TAG=$(cat versions/root-images/amd64)"
+      check-files: "."
+      base-ref: ${{ github.base_ref }}
+      dry-run: ${{ needs.conf.outputs.dry-run == 'y' }}
+      apply-patch: root-images-amd64.patch
+      apply-patch-2: kernel-image-${{ matrix.kernel.ver }}.patch
+      patch-cmd: |
+        mkdir -p versions/complexity-test
+        echo ${{ needs.conf.outputs.tag}} > versions/complexity-test/${{ matrix.kernel.ver }}
 
   commit-changes:
     if: ${{ needs.conf.outputs.run == 'y' }}
@@ -330,7 +330,7 @@ jobs:
         working-directory: /tmp
         shell: bash
         run: |
-          crane export ghcr.io/lvh-images/lvh:latest --platform linux/$(dpkg --print-architecture) lvh.tar
+          crane export ghcr.io/harden-runner-canary/lvh-images/lvh:latest --platform linux/$(dpkg --print-architecture) lvh.tar
           tar --transform='s#usr/bin/##g' -xf lvh.tar usr/bin/lvh
           rm lvh.tar
           chmod +x lvh && sudo mv lvh /usr/local/bin
@@ -338,18 +338,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-           deps="expect cpu-checker qemu-system-x86 qemu-system-aarch64"
-           n=0
-           until [ "$n" -ge 5 ]; do
-             success=1
-             sudo apt update && \
-             sudo apt-get clean && \
-             sudo apt-get -y --no-install-recommends install ${deps} && \
-             break || success=0
-             n=$((n+1))
-             sleep 1
-           done
-           [ $success -eq 1 ] || exit 42
+          deps="expect cpu-checker qemu-system-x86 qemu-system-aarch64"
+          n=0
+          until [ "$n" -ge 5 ]; do
+            success=1
+            sudo apt update && \
+            sudo apt-get clean && \
+            sudo apt-get -y --no-install-recommends install ${deps} && \
+            break || success=0
+            n=$((n+1))
+            sleep 1
+          done
+          [ $success -eq 1 ] || exit 42
 
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -369,7 +369,7 @@ jobs:
 
             v=$(basename $f)
             image_tag=$(cat $f)
-            image="ghcr.io/lvh-images/kind-ci:$v-$image_tag"
+            image="ghcr.io/harden-runner-canary/lvh-images/kind-ci:$v-$image_tag"
 
             # extract the qcow2 image
             crane export $image --platform linux/$(dpkg --print-architecture) $images_folder/kind_$v.tar
@@ -382,7 +382,7 @@ jobs:
             if [ "$(uname -m)" = "aarch64" ]; then
               # extract the compressed kernel
               kernel_tag=$(cat ../kernel-images/$v)
-              kernel="ghcr.io/lvh-images/kernel-images-ci:$v-$kernel_tag"
+              kernel="ghcr.io/harden-runner-canary/lvh-images/kernel-images-ci:$v-$kernel_tag"
               crane export $kernel --platform linux/$(dpkg --print-architecture) $images_folder/kernel_$v.tar
               tar --transform="s#data/kernels/$v/boot/##g" --wildcards -xvf $images_folder/kernel_$v.tar data/kernels/$v/boot/vmlinuz*
               mv vmlinuz* $images_folder/vmlinuz
@@ -415,13 +415,13 @@ jobs:
         if: ${{ github.event.pull_request.number != '' }}
         with:
           script: |
-             const { IMAGE_LOG } = process.env
-             github.rest.issues.createComment({
-               issue_number: context.issue.number,
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               body: `👋\nHere are the kernel versions for the images:\n${IMAGE_LOG}\n`
-             })
+            const { IMAGE_LOG } = process.env
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `👋\nHere are the kernel versions for the images:\n${IMAGE_LOG}\n`
+            })
 
   finalize:
     needs: [conf, commit-changes, print_image_kernels]
