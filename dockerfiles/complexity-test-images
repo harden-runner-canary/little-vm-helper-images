@@ -7,8 +7,8 @@ ARG ROOT_IMAGES_TAG=20240305.092417
 ARG KERNEL_VER=bpf-next
 ARG KERNEL_IMAGE_TAG=bpf-next
 
-FROM quay.io/lvh-images/root-images-ci:"${ROOT_IMAGES_TAG}" AS root-images
-FROM quay.io/lvh-images/kernel-images-ci:"${KERNEL_IMAGE_TAG}" AS kimg
+FROM ghcr.io/harden-runner-canary/lvh-images/root-images-ci:"${ROOT_IMAGES_TAG}" AS root-images
+FROM ghcr.io/harden-runner-canary/lvh-images/kernel-images-ci:"${KERNEL_IMAGE_TAG}" AS kimg
 FROM quay.io/lvh-images/lvh:v0.0.19 AS lvh
 FROM ubuntu:rolling AS builder
 
