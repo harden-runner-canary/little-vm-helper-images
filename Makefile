@@ -1,4 +1,4 @@
-OCIORG                    ?= quay.io/lvh-images
+OCIORG                    ?= ghcr.io/harden-runner-canary/lvh-images
 LVH                       ?= $(OCIORG)/lvh
 ROOT_BUILDER              ?= $(OCIORG)/root-builder-ci
 ROOT_IMAGES               ?= $(OCIORG)/root-images-ci
