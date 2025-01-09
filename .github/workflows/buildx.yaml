@@ -330,7 +330,7 @@ jobs:
         working-directory: /tmp
         shell: bash
         run: |
-          crane export ghcr.io/harden-runner-canary/lvh-images/lvh:latest --platform linux/$(dpkg --print-architecture) lvh.tar
+          crane export quay.io/lvh-images/lvh:latest --platform linux/$(dpkg --print-architecture) lvh.tar
           tar --transform='s#usr/bin/##g' -xf lvh.tar usr/bin/lvh
           rm lvh.tar
           chmod +x lvh && sudo mv lvh /usr/local/bin
