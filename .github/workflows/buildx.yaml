@@ -313,7 +313,7 @@ jobs:
       matrix:
         runner:
           - "ubuntu-latest"
-          - "ubuntu-22.04-arm64"
+          # - "ubuntu-22.04-arm64"
     runs-on: ${{ matrix.runner }}
     steps:
       - name: install crane
