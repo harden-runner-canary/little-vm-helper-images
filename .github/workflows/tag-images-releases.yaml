@@ -37,11 +37,10 @@ jobs:
         run: |
           name=${{ steps.tag.outputs.tag }}
           echo $name
-          for f in $(find ./versions -type f ! -name README.md -printf "%P\n")
+          for f in $(find ./versions -type f ! -name README.md ! -ipath *arm* -printf "%P\n")
           do
               tag=$(cat ./versions/$f)
-              # path_arch=$(echo $f | grep -oE 'arm64|amd64' || true)
-              path_arch=$(echo $f | grep -oE 'amd64' || true)
+              path_arch=$(echo $f | grep -oE 'arm64|amd64' || true)
               arch_suffix=$( [ -n "$path_arch" ] && echo "-$path_arch" || true)
               echo f=$f tag=$tag arch_suffix=$arch_suffix
 
