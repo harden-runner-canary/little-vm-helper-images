@@ -40,7 +40,8 @@ jobs:
           for f in $(find ./versions -type f ! -name README.md -printf "%P\n")
           do
               tag=$(cat ./versions/$f)
-              path_arch=$(echo $f | grep -oE 'arm64|amd64' || true)
+              # path_arch=$(echo $f | grep -oE 'arm64|amd64' || true)
+              path_arch=$(echo $f | grep -oE 'amd64' || true)
               arch_suffix=$( [ -n "$path_arch" ] && echo "-$path_arch" || true)
               echo f=$f tag=$tag arch_suffix=$arch_suffix
 
@@ -68,7 +69,9 @@ jobs:
               multi_image="$kind_image_name:$f-$multi_tag"
               amd64_image="$multi_image-amd64"
               arm64_image="$multi_image-arm64"
-              docker buildx imagetools create -t $kind_image_name:$f-main -t $multi_image $amd64_image $arm64_image
+              # docker buildx imagetools create -t $kind_image_name:$f-main -t $multi_image $amd64_image $arm64_image
+              docker buildx imagetools create -t $kind_image_name:$f-main -t $multi_image $amd64_image
+
           done
       - name: tag amd64 mono-arch rhel8 images
         run: |
@@ -103,4 +106,5 @@ jobs:
           multi_image="$root_images_name:$multi_tag"
           amd64_image="$multi_image-amd64"
           arm64_image="$multi_image-arm64"
-          docker buildx imagetools create -t $root_images_name:main -t $multi_image $amd64_image $arm64_image
+          # docker buildx imagetools create -t $root_images_name:main -t $multi_image $amd64_image $arm64_image
+          docker buildx imagetools create -t $root_images_name:main -t $multi_image $amd64_image
