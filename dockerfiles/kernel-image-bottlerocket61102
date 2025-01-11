@@ -9,7 +9,7 @@ COPY --from=lvh /usr/bin/lvh /usr/bin/lvh
 
 RUN dnf install -y 'dnf-command(builddep)' 'dnf-command(config-manager)'
 RUN dnf config-manager --set-enabled powertools
-RUN dnf install -y gcc gcc-c++ binutils gcc-toolset-10 python3-docutils epel-release && sudo dnf config-manager --set-enabled powertools && sudo dnf install -y gcc-toolset-10-binutils gzip hostname systemd tar
+RUN dnf install -y gcc gcc-c++ binutils gcc-toolset-10 python3-docutils epel-release && dnf config-manager --set-enabled powertools && dnf install -y gcc-toolset-10-binutils gzip hostname systemd tar
 
 FROM builder AS prepare
 
