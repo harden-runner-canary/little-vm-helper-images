@@ -23,7 +23,7 @@ RUN rpm -ivh kernel*.src.rpm
 WORKDIR /root/rpmbuild/SPECS
 
 # Install build dependencies for the kernel spec file
-RUN dnf builddep -y --define '_with_baseonly 1' kernel.spec
+RUN dnf builddep -y kernel.spec
 
 # Prepare the kernel source tree
 RUN rpmbuild -bp kernel.spec --with baseonly
