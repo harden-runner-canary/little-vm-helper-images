@@ -22,6 +22,7 @@ RUN rpm -ivh kernel*.src.rpm
 
 RUN ls -lah
 WORKDIR /root/rpmbuild/SPECS
+RUN cat kernel.spec
 RUN ls -lah
 
 # Install build dependencies for the kernel spec file
