@@ -8,7 +8,7 @@ FROM fedora:23 AS builder
 COPY --from=lvh /usr/bin/lvh /usr/bin/lvh
 
 # Install dependencies for kernel building
-RUN dnf install -y fedpkg fedora-packager rpmdevtools ncurses-devel pesign grubby curl tar patch make gcc
+RUN dnf install -y fedpkg fedora-packager rpmdevtools ncurses-devel pesign grubby curl tar patch make gcc10 gcc10-binutils
 
 FROM builder AS prepare
 
