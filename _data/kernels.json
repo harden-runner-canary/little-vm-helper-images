@@ -37,7 +37,7 @@
             "url": "git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git?depth=1#linux-6.1.y"
         },
         {
-            "name": "bottlerocket-6.1.102",
+            "name": "bottlerocket61102",
             "url": "git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git?depth=1#v6.1.102",
             "opts": [
                 ["--enable", "CONFIG_EXT4_FS"],
