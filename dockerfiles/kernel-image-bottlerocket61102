@@ -13,7 +13,9 @@ RUN dnf config-manager --set-enabled powertools
 FROM builder AS prepare
 
 WORKDIR /tmp
-RUN curl -LO "https://cdn.amazonlinux.com/al2023/blobstore/c5625ba4f37a38809773fa50b769735602f1e4e50d60cb7127ed6231d0695e95/kernel-6.1.102-111.182.amzn2023.src.rpm"
+
+# from: https://github.com/bottlerocket-os/bottlerocket-kernel-kit/blob/develop/packages/kernel-6.1/kernel-6.1.spec#L1
+RUN curl -LO "https://cdn.amazonlinux.com/al2023/blobstore/bc929cd6c35e297ebc5760d75997d219080501a32b7936641003178bce778074/kernel-6.1.102-111.182.amzn2023.src.rpm"
 
 RUN rpm -ivh kernel*.src.rpm
 
