@@ -42,8 +42,6 @@
             "opts": [
                 ["--enable", "CONFIG_EXT4_FS"],
                 ["--enable", "CONFIG_EROFS_FS"],
-                ["--module", "CONFIG_BTRFS_FS"],
-                ["--enable", "CONFIG_BTRFS_FS_POSIX_ACL"],
                 ["--module", "CONFIG_SQUASHFS"],
                 ["--enable", "CONFIG_SQUASHFS_FILE_CACHE"],
                 ["--enable", "CONFIG_SQUASHFS_DECOMP_SINGLE"],
