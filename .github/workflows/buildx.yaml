@@ -80,7 +80,7 @@ jobs:
 
             ret = []
             for (const k of kernels) {
-                options = {"ver": k, "name": `${k}`}
+                options = {"ver": k}
                 switch (k) {
                     case 'rhel8.6':
                         options.dockerfile = "dockerfiles/kernel-images-rhel8"
@@ -94,12 +94,6 @@ jobs:
                         options.rhel_ver = '8.9'
                         options.rhel_kver = '4.18.0-513.24.1.el8_9'
                         break
-                    case 'bottlerocket61102':
-                        option.name = "bottlerocket61102"
-                        options.ver = "6.1.102"
-                        options.dockerfile = "dockerfiles/kernel-images"
-                        options.platforms = 'linux/amd64,linux/arm64'
-                        break;
                     default:
                         options.dockerfile = "dockerfiles/kernel-images"
                         options.platforms = 'linux/amd64,linux/arm64'
@@ -141,9 +135,9 @@ jobs:
     uses: ./.github/workflows/buildx-stage.yaml
     secrets: inherit
     with:
-      name: kernel-image-${{ matrix.kernel.ver }} | ${{ matrix.kernel.name }}
+      name: kernel-image-${{ matrix.kernel.ver }}
       build-file: ${{ matrix.kernel.dockerfile }}
-      build-tag: ghcr.io/harden-runner-canary/lvh-images/kernel-images-ci:${{ matrix.kernel.name }}-${{ needs.conf.outputs.tag }}
+      build-tag: ghcr.io/harden-runner-canary/lvh-images/kernel-images-ci:${{ matrix.kernel.ver }}-${{ needs.conf.outputs.tag }}
       build-args: |
         "KERNEL_VER=${{ matrix.kernel.ver }}"
         "RHEL_VER=${{ matrix.kernel.rhel_ver }}"
