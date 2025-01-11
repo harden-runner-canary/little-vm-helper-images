@@ -20,27 +20,29 @@ RUN curl -LO "https://cdn.amazonlinux.com/al2023/blobstore/bc929cd6c35e297ebc576
 # Extract the kernel source
 RUN rpm -ivh kernel*.src.rpm
 
+RUN ls -lah
 WORKDIR /root/rpmbuild/SPECS
+RUN ls -lah
 
 # Install build dependencies for the kernel spec file
 RUN dnf builddep -y kernel.spec
 
 # Prepare the kernel source tree
-RUN rpmbuild -bp kernel.spec --with baseonly
+# RUN rpmbuild -bp kernel.spec --with baseonly
 
-# Link the kernel source directory to a common path
-RUN ln -s /root/rpmbuild/BUILD/kernel-*/linux-* /tmp/build
-WORKDIR /tmp/build
+# # Link the kernel source directory to a common path
+# RUN ln -s /root/rpmbuild/BUILD/kernel-*/linux-* /tmp/build
+# WORKDIR /tmp/build
 
-# Clean and prepare for configuration
-RUN make -s mrproper
+# # Clean and prepare for configuration
+# RUN make -s mrproper
 
-# Copy the default Bottlerocket kernel configuration
-RUN cp configs/kernel-*-$(uname -m).config .config
+# # Copy the default Bottlerocket kernel configuration
+# RUN cp configs/kernel-*-$(uname -m).config .config
 
-# Configure the kernel for Bottlerocket
-COPY _data /data
-RUN lvh kernels --dir /data raw_configure . bottlerocket61102 2>&1
+# # Configure the kernel for Bottlerocket
+# COPY _data /data
+# RUN lvh kernels --dir /data raw_configure . bottlerocket61102 2>&1
 
 FROM prepare AS build
 
