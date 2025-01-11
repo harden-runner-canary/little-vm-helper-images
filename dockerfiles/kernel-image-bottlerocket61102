@@ -9,9 +9,8 @@ COPY --from=lvh /usr/bin/lvh /usr/bin/lvh
 
 # https://fedoraproject.org/wiki/Building_a_custom_kernel#Dependencies_for_building_kernels
 
-RUN dnf install -y 'dnf-command(builddep)' 'dnf-command(config-manager)'
+RUN dnf install -y 'dnf-command(builddep)' 'dnf-command(config-manager)' gcc gcc-c++ binutils gcc10-binutils gcc-toolset-10 python3-docutils epel-release gcc-toolset-10-binutils gzip hostname systemd tar fedpkg fedora-packager rpmdevtools ncurses-devel pesign grubby
 RUN dnf config-manager --set-enabled powertools
-RUN dnf install -y gcc gcc-c++ binutils gcc10-binutils gcc-toolset-10 python3-docutils epel-release gcc-toolset-10-binutils gzip hostname systemd tar fedpkg fedora-packager rpmdevtools ncurses-devel pesign grubby
 
 FROM builder AS prepare
 
