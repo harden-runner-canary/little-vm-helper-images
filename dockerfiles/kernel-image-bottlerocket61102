@@ -3,7 +3,7 @@
 
 FROM quay.io/lvh-images/lvh:v0.0.19 AS lvh
 
-FROM fedora:latest AS builder
+FROM rockylinux:8 AS builder
 
 COPY --from=lvh /usr/bin/lvh /usr/bin/lvh
 
