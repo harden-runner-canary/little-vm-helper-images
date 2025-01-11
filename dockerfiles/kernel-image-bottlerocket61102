@@ -7,41 +7,51 @@ FROM fedora:23 AS builder
 
 COPY --from=lvh /usr/bin/lvh /usr/bin/lvh
 
-# https://fedoraproject.org/wiki/Building_a_custom_kernel#Dependencies_for_building_kernels
-
-RUN dnf install -y 'dnf-command(builddep)' 'dnf-command(config-manager)' gcc gcc-c++ binutils gcc10-binutils gcc-toolset-10 python3-docutils epel-release gcc-toolset-10-binutils gzip hostname systemd tar fedpkg fedora-packager rpmdevtools ncurses-devel pesign grubby
-RUN dnf config-manager --set-enabled powertools
+# Install dependencies for kernel building
+RUN dnf install -y fedpkg fedora-packager rpmdevtools ncurses-devel pesign grubby curl tar patch make gcc
 
 FROM builder AS prepare
 
 WORKDIR /tmp
 
-# from: https://github.com/bottlerocket-os/bottlerocket-kernel-kit/blob/develop/packages/kernel-6.1/kernel-6.1.spec#L1
+# Download the Bottlerocket kernel source RPM
 RUN curl -LO "https://cdn.amazonlinux.com/al2023/blobstore/bc929cd6c35e297ebc5760d75997d219080501a32b7936641003178bce778074/kernel-6.1.102-111.182.amzn2023.src.rpm"
 
+# Extract the kernel source
 RUN rpm -ivh kernel*.src.rpm
 
 WORKDIR /root/rpmbuild/SPECS
+
+# Install build dependencies for the kernel spec file
 RUN dnf builddep -y --define '_with_baseonly 1' kernel.spec
+
+# Prepare the kernel source tree
 RUN rpmbuild -bp kernel.spec --with baseonly
 
+# Link the kernel source directory to a common path
 RUN ln -s /root/rpmbuild/BUILD/kernel-*/linux-* /tmp/build
 WORKDIR /tmp/build
 
-# Emulate InitBuildVars() from kernel.spec
+# Clean and prepare for configuration
 RUN make -s mrproper
+
+# Copy the default Bottlerocket kernel configuration
 RUN cp configs/kernel-*-$(uname -m).config .config
 
+# Configure the kernel for Bottlerocket
 COPY _data /data
-
 RUN lvh kernels --dir /data raw_configure . bottlerocket61102 2>&1
 
 FROM prepare AS build
 
+# Compile the kernel and generate a tarball
 RUN make -j $(nproc) tar-pkg
 
+# Generate BTF debug information for eBPF compatibility
 COPY scripts/generate-btf.sh /tmp/
 RUN /tmp/generate-btf.sh /tmp/build/tar-install
 
 FROM busybox as kernel
+
+# Copy the built kernel tarball to the final image
 COPY --from=build /tmp/build/tar-install /data/kernels/bottlerocket61102
