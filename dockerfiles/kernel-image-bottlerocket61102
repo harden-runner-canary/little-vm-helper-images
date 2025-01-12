@@ -36,6 +36,9 @@ RUN make -s mrproper
 
 RUN cp configs/kernel-*-*.config .config
 
+# Remove all RHEL modules
+RUN sed --in-place -E -e 's/^(CONFIG_[^=]+)=m/# \1 is not set/' .config
+
 # # Configure the kernel for Bottlerocket
 COPY _data /data
 RUN lvh kernels --dir /data raw_configure . bottlerocket61102 2>&1
