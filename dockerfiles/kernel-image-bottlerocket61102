@@ -23,6 +23,8 @@ RUN rpm -ivh kernel*.src.rpm
 
 WORKDIR /root/rpmbuild/SPECS
 
+# install deps
+RUN dnf builddep -y kernel.spec
 
 # Prepare the kernel source tree
 RUN rpmbuild -bp kernel.spec
