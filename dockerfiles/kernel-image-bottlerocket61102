@@ -1,0 +1,58 @@
+# syntax=docker/dockerfile:1.3-labs
+# vim: set ft=dockerfile:
+
+FROM quay.io/lvh-images/lvh:v0.0.19 AS lvh
+
+FROM amazonlinux:2023 AS builder
+
+COPY --from=lvh /usr/bin/lvh /usr/bin/lvh
+
+# Install dependencies for kernel building
+RUN dnf install -y 'dnf-command(builddep)' 'dnf-command(config-manager)'
+RUN yum install -y rpmdevtools
+
+FROM builder AS prepare
+
+WORKDIR /tmp
+
+# Download the Bottlerocket kernel source RPM
+RUN curl -LO "https://cdn.amazonlinux.com/al2023/blobstore/bc929cd6c35e297ebc5760d75997d219080501a32b7936641003178bce778074/kernel-6.1.102-111.182.amzn2023.src.rpm"
+
+# Extract the kernel source
+RUN rpm -ivh kernel*.src.rpm
+
+WORKDIR /root/rpmbuild/SPECS
+
+# install deps
+RUN dnf builddep -y kernel.spec
+
+# Prepare the kernel source tree
+RUN rpmbuild -bp kernel.spec
+
+RUN ln -s /root/rpmbuild/BUILD/kernel-*/linux-* /tmp/build
+WORKDIR /tmp/build
+
+RUN make -s mrproper
+
+RUN cp configs/kernel-*-*.config .config
+
+# Remove all RHEL modules
+RUN sed --in-place -E -e 's/^(CONFIG_[^=]+)=m/# \1 is not set/' .config
+
+# # Configure the kernel for Bottlerocket
+COPY _data /data
+RUN lvh kernels --dir /data raw_configure . bottlerocket61102 2>&1
+
+FROM prepare AS build
+
+# Compile the kernel and generate a tarball
+RUN make -j $(nproc) tar-pkg
+
+# Generate BTF debug information for eBPF compatibility
+COPY scripts/generate-btf.sh /tmp/
+RUN /tmp/generate-btf.sh /tmp/build/tar-install
+
+FROM busybox as kernel
+
+# Copy the built kernel tarball to the final image
+COPY --from=build /tmp/build/tar-install /data/kernels/bottlerocket61102
