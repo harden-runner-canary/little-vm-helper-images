@@ -9,6 +9,7 @@ WORKDIR /data
 RUN lvh version
 # NB: logrus sends everything to stderr it seems, so redirect it to stdout
 RUN lvh kernels --dir . fetch     2>&1 ${KERNEL_VER}
+RUN ls -R
 ARG TARGETARCH
 RUN lvh kernels --dir . configure --arch $TARGETARCH 2>&1 ${KERNEL_VER}
 RUN lvh kernels --dir . build     --arch $TARGETARCH 2>&1 ${KERNEL_VER}
