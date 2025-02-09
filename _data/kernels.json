@@ -38,7 +38,7 @@
         },
         {
             "name": "5.15",
-            "url": "git://git.launchpad.net/ubuntu/+source/linux-meta-azure-5.15"
+            "url": "git://git.launchpad.net/ubuntu/+source/linux-meta-azure-5.15#applied/5.15.0.1078.87_20.04.1"
         },
         {
             "name": "5.10",
