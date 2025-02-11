@@ -1,6 +1,6 @@
 # vim: set ft=dockerfile:
 
-ARG KERNEL_BUILDER_TAG=20250210.061417
+ARG KERNEL_BUILDER_TAG=20250210.062745
 
 FROM --platform=$BUILDPLATFORM ghcr.io/harden-runner-canary/lvh-images/kernel-builder-ci:"${KERNEL_BUILDER_TAG}" AS builder
 ARG KERNEL_VER=bpf-next
