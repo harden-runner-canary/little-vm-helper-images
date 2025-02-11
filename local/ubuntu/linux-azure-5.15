@@ -1,0 +1,24 @@
+# vim: set ft=dockerfile:
+
+ARG KERNEL_BUILDER_TAG=20240726.133707
+
+FROM --platform=$BUILDPLATFORM quay.io/lvh-images/kernel-builder-ci:"${KERNEL_BUILDER_TAG}" AS builder
+
+ARG KERNEL_TAG=linux-azure-5.15
+ARG TARGETARCH
+
+COPY _data /data
+WORKDIR /data
+RUN lvh version
+
+# NB: logrus sends everything to stderr it seems, so redirect it to stdout
+RUN lvh kernels --dir . add linux-azure-5.15 git://git.launchpad.net/ubuntu/+source/linux-meta-azure-5.15 --fetch 2>&1 ${KERNEL_TAG}
+
+RUN lvh kernels --dir . build     --arch $TARGETARCH 2>&1 ${KERNEL_TAG}
+
+COPY scripts/generate-btf.sh /tmp/
+RUN /tmp/generate-btf.sh /data/kernels/${KERNEL_TAG}/tar-install
+
+FROM busybox
+ARG KERNEL_TAG=linux-azure-5.15
+COPY --from=builder /data/kernels/${KERNEL_TAG}/tar-install /data/kernels/${KERNEL_TAG}
