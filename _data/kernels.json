@@ -38,7 +38,7 @@
         },
         {
             "name": "5.15",
-            "url": "git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git?depth=1#linux-5.15.y"
+            "url": "git://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/jammy?depth=1#Ubuntu-5.15.0-134.145"
         },
         {
             "name": "5.10",
