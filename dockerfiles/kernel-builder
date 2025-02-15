@@ -3,7 +3,7 @@ FROM ghcr.io/harden-runner-canary/lvh:pr-1 AS lvh
 
 # 20240130.185425
 
-FROM ubuntu:rolling
+FROM ubuntu:focal
 
 COPY --from=lvh /usr/bin/lvh /usr/bin/lvh
 RUN  apt-get update -yq &&  \
