@@ -96,7 +96,7 @@ jobs:
                         break
                     default:
                         options.dockerfile = "dockerfiles/kernel-images"
-                        options.platforms = 'linux/amd64,linux/arm64'
+                        options.platforms = 'linux/amd64'
                 }
                 ret.push(options)
             }

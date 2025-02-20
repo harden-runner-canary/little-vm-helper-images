@@ -1,12 +1,17 @@
 # vim: set ft=dockerfile:
 
-ARG KERNEL_BUILDER_TAG=20240726.133707
+ARG KERNEL_BUILDER_TAG=20250215.121519
 
-FROM --platform=$BUILDPLATFORM quay.io/lvh-images/kernel-builder-ci:"${KERNEL_BUILDER_TAG}" AS builder
+FROM --platform=$BUILDPLATFORM ghcr.io/harden-runner-canary/lvh-images/kernel-builder-ci:"${KERNEL_BUILDER_TAG}" AS builder
 ARG KERNEL_VER=bpf-next
 COPY _data /data
 WORKDIR /data
 RUN lvh version
+
+RUN gcc -v
+RUN alias gcc="gcc -std=c11"
+RUN gcc -v
+
 # NB: logrus sends everything to stderr it seems, so redirect it to stdout
 RUN lvh kernels --dir . fetch     2>&1 ${KERNEL_VER}
 ARG TARGETARCH
